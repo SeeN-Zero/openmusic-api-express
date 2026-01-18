@@ -1,0 +1,78 @@
+class SongController {
+    constructor(service) {
+        this._service = service;
+    }
+
+    async postSongHandler(req, res, next) {
+        try {
+            const songId = await this._service.addSong(req.validated);
+
+            res.status(201).json({
+                status: 'success', data: {
+                    songId,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSongsHandler(req, res, next) {
+        try {
+            const {title, performer} = req.query;
+
+            const songs = await this._service.getSongs(title, performer);
+
+            res.json({
+                status: 'success', data: {
+                    songs,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSongByIdHandler(req, res, next) {
+        try {
+            const {id} = req.params;
+            const song = await this._service.getSongById(id);
+
+            res.json({
+                status: 'success', data: {
+                    song,
+                },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async putSongByIdHandler(req, res, next) {
+        try {
+            const {id} = req.params;
+            await this._service.editSongById(id, req.validated);
+
+            res.json({
+                status: 'success', message: 'Lagu berhasil diperbarui',
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteSongByIdHandler(req, res, next) {
+        try {
+            const {id} = req.params;
+            await this._service.deleteSongById(id);
+
+            res.json({
+                status: 'success', message: 'Lagu berhasil dihapus',
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+}
+
+export default SongController;
