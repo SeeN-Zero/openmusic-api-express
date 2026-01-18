@@ -1,7 +1,7 @@
 export const shorthands = undefined;
 
 export const up = (pgm) => {
-    pgm.createTable({schema: 'openmusic_schema', name: 'albums'}, {
+    pgm.createTable('albums', {
         id: {
             type: 'VARCHAR(50)',
             primaryKey: true,
@@ -16,7 +16,7 @@ export const up = (pgm) => {
         },
     });
 
-    pgm.createTable({schema: 'openmusic_schema', name: 'songs'}, {
+    pgm.createTable('songs', {
         id: {
             type: 'VARCHAR(50)',
             primaryKey: true,
@@ -44,7 +44,7 @@ export const up = (pgm) => {
         album_id: {
             type: 'VARCHAR(50)',
             notNull: false,
-            references: {schema: 'openmusic_schema', name: 'albums'},
+            references: 'albums',
             onDelete: 'CASCADE',
         },
     });

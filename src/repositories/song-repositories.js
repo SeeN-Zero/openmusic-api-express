@@ -10,7 +10,7 @@ class SongRepository {
         const id = 'song-' + nanoid(16);
 
         const query = {
-            text: 'INSERT INTO openmusic_schema.songs (id, title, year, genre, performer, duration, album_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+            text: 'INSERT INTO songs (id, title, year, genre, performer, duration, album_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
             values: [id, title, year, genre, performer, duration, albumId]
         };
 
@@ -19,7 +19,7 @@ class SongRepository {
     }
 
     async getSongs(title = '', performer = '') {
-        let text = 'SELECT id, title, performer FROM openmusic_schema.songs WHERE 1=1';
+        let text = 'SELECT id, title, performer FROM songs WHERE 1=1';
         const values = [];
 
         if (title) {
@@ -38,7 +38,7 @@ class SongRepository {
 
     async getSongById(id) {
         const query = {
-            text: 'SELECT * FROM openmusic_schema.songs WHERE id = $1', values: [id]
+            text: 'SELECT * FROM songs WHERE id = $1', values: [id]
         };
 
         const result = await this.pool.query(query);
@@ -47,7 +47,7 @@ class SongRepository {
 
     async updateSongById(id, {title, year, genre, performer, duration, albumId}) {
         const query = {
-            text: 'UPDATE openmusic_schema.songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7',
+            text: 'UPDATE songs SET title = $1, year = $2, genre = $3, performer = $4, duration = $5, album_id = $6 WHERE id = $7',
             values: [title, year, genre, performer, duration, albumId, id]
         };
 
@@ -57,7 +57,7 @@ class SongRepository {
 
     async deleteSongById(id) {
         const query = {
-            text: 'DELETE FROM openmusic_schema.songs WHERE id = $1', values: [id]
+            text: 'DELETE FROM songs WHERE id = $1', values: [id]
         };
 
         const result = await this.pool.query(query);
@@ -66,7 +66,7 @@ class SongRepository {
 
     async getSongsByAlbumId(albumId) {
         const query = {
-            text: 'SELECT id, title, performer FROM openmusic_schema.songs WHERE album_id = $1', values: [albumId],
+            text: 'SELECT id, title, performer FROM songs WHERE album_id = $1', values: [albumId],
         };
 
         const result = await this.pool.query(query);

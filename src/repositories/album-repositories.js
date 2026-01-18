@@ -10,7 +10,7 @@ class AlbumRepositories {
         const id = 'album' + nanoid(16);
 
         const query = {
-            text: 'INSERT INTO openmusic_schema.albums (id, name, year) VALUES ($1, $2, $3) RETURNING id',
+            text: 'INSERT INTO albums (id, name, year) VALUES ($1, $2, $3) RETURNING id',
             values: [id, name, year]
         };
 
@@ -21,7 +21,7 @@ class AlbumRepositories {
 
     async getAlbumById(id) {
         const query = {
-            text: 'SELECT * FROM openmusic_schema.albums WHERE id = $1', values: [id]
+            text: 'SELECT * FROM albums WHERE id = $1', values: [id]
         };
 
         const result = await this.pool.query(query);
@@ -31,7 +31,7 @@ class AlbumRepositories {
 
     async updateAlbum({id, name, year}) {
         const query = {
-            text: 'UPDATE openmusic_schema.albums SET name = $1, year = $2 WHERE id = $3', values: [name, year, id]
+            text: 'UPDATE albums SET name = $1, year = $2 WHERE id = $3', values: [name, year, id]
         };
 
         const result = await this.pool.query(query);
@@ -41,7 +41,7 @@ class AlbumRepositories {
 
     async deleteAlbum(id) {
         const query = {
-            text: 'DELETE FROM openmusic_schema.albums WHERE id = $1', values: [id]
+            text: 'DELETE FROM albums WHERE id = $1', values: [id]
         }
 
         const result = await this.pool.query(query);
