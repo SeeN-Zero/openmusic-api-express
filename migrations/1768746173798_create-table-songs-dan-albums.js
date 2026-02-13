@@ -51,6 +51,6 @@ export const up = (pgm) => {
 };
 
 export const down = (pgm) => {
-    pgm.dropTable({schema: 'openmusic_schema', name: 'songs'});
-    pgm.dropTable({schema: 'openmusic_schema', name: 'albums'});
+    pgm.dropTable('songs');
+    pgm.dropTable('albums');
 };

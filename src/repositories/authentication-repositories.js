@@ -1,0 +1,42 @@
+import {Pool} from 'pg';
+
+import InvariantError from '../exceptions/invariant-error.js';
+
+class AuthenticationRepositories {
+    constructor() {
+        this.pool = new Pool();
+    }
+
+    async addToken(token) {
+        const query = {
+            text: 'INSERT INTO authentications (token) VALUES ($1)',
+            values: [token],
+        };
+
+        await this.pool.query(query);
+    }
+
+    async verifyToken(token) {
+        const query = {
+            text: 'SELECT token FROM authentications WHERE token = $1',
+            values: [token],
+        };
+
+        const result = await this.pool.query(query);
+
+        if (!result.rowCount) {
+            throw new InvariantError('Refresh token tidak valid');
+        }
+    }
+
+    async deleteToken(token) {
+        const query = {
+            text: 'DELETE FROM authentications WHERE token = $1',
+            values: [token],
+        };
+
+        await this.pool.query(query);
+    }
+}
+
+export default AuthenticationRepositories;

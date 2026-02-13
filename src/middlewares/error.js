@@ -14,6 +14,15 @@ const ErrorHandler = (err, req, res, _next) => {
     const message = err.message || 'Internal Server Error';
 
     console.error('Unhandled error:', err);
+    if (status >= 500) {
+        return res.status(status).json({
+            code: status,
+            status: 'error',
+            message,
+            data: null,
+        });
+    }
+
     return response(res, status, message, null);
 };
 

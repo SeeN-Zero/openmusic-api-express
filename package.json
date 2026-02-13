@@ -13,9 +13,11 @@
     "lint": "eslint ./"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.2",
     "nanoid": "^5.1.6",
     "node-pg-migrate": "^8.0.4",
     "pg": "^8.17.1"
