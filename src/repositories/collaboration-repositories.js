@@ -2,6 +2,7 @@ import {Pool} from 'pg';
 import {nanoid} from 'nanoid';
 
 import NotFoundError from '../exceptions/not-found-error.js';
+import InvariantError from '../exceptions/invariant-error.js';
 
 class CollaborationRepositories {
     constructor() {
@@ -16,8 +17,16 @@ class CollaborationRepositories {
             values: [id, playlistId, userId],
         };
 
-        const result = await this.pool.query(query);
-        return result.rows[0];
+        try {
+            const result = await this.pool.query(query);
+            return result.rows[0];
+        } catch (error) {
+            if (error.code === '23505' && error.constraint === 'collaborations_playlist_id_user_id_unique') {
+                throw new InvariantError('Kolaborasi sudah terdaftar');
+            }
+
+            throw error;
+        }
     }
 
     async deleteCollaboration(playlistId, userId) {

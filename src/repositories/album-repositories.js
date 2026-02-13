@@ -7,7 +7,7 @@ class AlbumRepositories {
     }
 
     async createAlbum({name, year}) {
-        const id = 'album' + nanoid(16);
+        const id = 'album-' + nanoid(16);
 
         const query = {
             text: 'INSERT INTO albums (id, name, year) VALUES ($1, $2, $3) RETURNING id',

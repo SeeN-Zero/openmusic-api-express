@@ -3,10 +3,27 @@ import {nanoid} from 'nanoid';
 
 import NotFoundError from '../exceptions/not-found-error.js';
 import AuthorizationError from '../exceptions/authorization-error.js';
+import InvariantError from '../exceptions/invariant-error.js';
 
 class PlaylistRepositories {
     constructor() {
         this.pool = new Pool();
+    }
+
+    async executeInTransaction(callback) {
+        const client = await this.pool.connect();
+
+        try {
+            await client.query('BEGIN');
+            const result = await callback(client);
+            await client.query('COMMIT');
+            return result;
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 
     async addPlaylist({name, owner}) {
@@ -97,36 +114,47 @@ class PlaylistRepositories {
         }
     }
 
-    async addPlaylistSong(playlistId, songId) {
+    async addPlaylistSong(playlistId, songId, client = null) {
         const id = `playlist-song-${nanoid(16)}`;
+        const executor = client || this.pool;
 
         const query = {
             text: 'INSERT INTO playlist_songs (id, playlist_id, song_id) VALUES ($1, $2, $3) RETURNING id',
             values: [id, playlistId, songId],
         };
 
-        const result = await this.pool.query(query);
-        return result.rows[0];
+        try {
+            const result = await executor.query(query);
+            return result.rows[0];
+        } catch (error) {
+            if (error.code === '23505' && error.constraint === 'playlist_songs_playlist_id_song_id_unique') {
+                throw new InvariantError('Lagu sudah ada di playlist');
+            }
+
+            throw error;
+        }
     }
 
-    async addPlaylistSongActivity({playlistId, songId, userId, action, time}) {
+    async addPlaylistSongActivity({playlistId, songId, userId, action, time}, client = null) {
         const id = `playlist-activity-${nanoid(16)}`;
+        const executor = client || this.pool;
 
         const query = {
             text: 'INSERT INTO playlist_song_activities (id, playlist_id, song_id, user_id, action, time) VALUES ($1, $2, $3, $4, $5, $6)',
             values: [id, playlistId, songId, userId, action, time],
         };
 
-        await this.pool.query(query);
+        await executor.query(query);
     }
 
-    async deletePlaylistSong(playlistId, songId) {
+    async deletePlaylistSong(playlistId, songId, client = null) {
+        const executor = client || this.pool;
         const query = {
             text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
             values: [playlistId, songId],
         };
 
-        const result = await this.pool.query(query);
+        const result = await executor.query(query);
         if (!result.rowCount) {
             throw new NotFoundError('Lagu tidak ditemukan di playlist');
         }

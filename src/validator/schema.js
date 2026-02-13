@@ -1,17 +1,18 @@
 import Joi from 'joi';
+const CURRENT_YEAR = new Date().getFullYear();
 
 // --- ALBUM SCHEMAS ---
 
 export const albumPayloadSchema = Joi.object({
     name: Joi.string().required(),
-    year: Joi.number().integer().min(1900).max(2026).required(),
+    year: Joi.number().integer().min(1900).max(CURRENT_YEAR).required(),
 });
 
 // --- SONG SCHEMAS ---
 
 export const songPayloadSchema = Joi.object({
     title: Joi.string().required(),
-    year: Joi.number().integer().min(1900).max(2026).required(),
+    year: Joi.number().integer().min(1900).max(CURRENT_YEAR).required(),
     genre: Joi.string().required(),
     performer: Joi.string().required(),
     duration: Joi.number().optional(),

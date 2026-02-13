@@ -34,17 +34,19 @@ class PlaylistService {
             throw new NotFoundError('Lagu tidak ditemukan');
         }
 
-        const result = await this._playlistRepository.addPlaylistSong(playlistId, songId);
-        if (!result.id) {
-            throw new InvariantError('Lagu gagal ditambahkan ke playlist');
-        }
+        await this._playlistRepository.executeInTransaction(async (client) => {
+            const result = await this._playlistRepository.addPlaylistSong(playlistId, songId, client);
+            if (!result.id) {
+                throw new InvariantError('Lagu gagal ditambahkan ke playlist');
+            }
 
-        await this._playlistRepository.addPlaylistSongActivity({
-            playlistId,
-            songId,
-            userId,
-            action: 'add',
-            time: new Date().toISOString(),
+            await this._playlistRepository.addPlaylistSongActivity({
+                playlistId,
+                songId,
+                userId,
+                action: 'add',
+                time: new Date().toISOString(),
+            }, client);
         });
     }
 
@@ -70,14 +72,16 @@ class PlaylistService {
             throw new NotFoundError('Lagu tidak ditemukan');
         }
 
-        await this._playlistRepository.deletePlaylistSong(playlistId, songId);
+        await this._playlistRepository.executeInTransaction(async (client) => {
+            await this._playlistRepository.deletePlaylistSong(playlistId, songId, client);
 
-        await this._playlistRepository.addPlaylistSongActivity({
-            playlistId,
-            songId,
-            userId,
-            action: 'delete',
-            time: new Date().toISOString(),
+            await this._playlistRepository.addPlaylistSongActivity({
+                playlistId,
+                songId,
+                userId,
+                action: 'delete',
+                time: new Date().toISOString(),
+            }, client);
         });
     }
 
