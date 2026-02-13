@@ -18,7 +18,6 @@ class AlbumService {
     }
 
     async getAlbumById(id) {
-        // 1. Ambil data album dari repository
         const album = await this._repository.getAlbumById(id);
 
         if (!album) {

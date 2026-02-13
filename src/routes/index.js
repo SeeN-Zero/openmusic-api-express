@@ -37,7 +37,6 @@ import {
 
 const router = express.Router();
 
-// 1. Inisialisasi Dependency
 const albumRepository = new AlbumRepositories();
 const songRepository = new SongRepository();
 const userRepository = new UserRepositories();
