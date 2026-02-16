@@ -13,6 +13,8 @@ import UserService from '../services/user-service.js';
 import AuthenticationService from '../services/authentication-service.js';
 import PlaylistService from '../services/playlist-service.js';
 import CollaborationService from '../services/collaboration-service.js';
+import ProducerService from '../services/producer-service.js';
+import CacheService from '../services/cache-service.js';
 // Import Controllers
 import AlbumController from '../controllers/album-controllers.js';
 import SongController from '../controllers/song-controllers.js';
@@ -24,6 +26,7 @@ import CollaborationController from '../controllers/collaboration-controllers.js
 // Import Middleware & Schemas
 import validate from '../middlewares/validate.js';
 import authenticate from '../middlewares/authentication.js';
+import uploadCover from '../middlewares/upload.js';
 import {
     albumPayloadSchema,
     songPayloadSchema,
@@ -33,6 +36,7 @@ import {
     playlistPayloadSchema,
     playlistSongPayloadSchema,
     collaborationPayloadSchema,
+    exportPlaylistPayloadSchema,
 } from '../validator/schema.js';
 
 const router = express.Router();
@@ -44,18 +48,20 @@ const authenticationRepository = new AuthenticationRepositories();
 const playlistRepository = new PlaylistRepositories();
 const collaborationRepository = new CollaborationRepositories();
 
-const albumService = new AlbumService(albumRepository, songRepository);
+const cacheService = new CacheService();
+const albumService = new AlbumService(albumRepository, songRepository, cacheService);
 const songService = new SongService(songRepository);
 const userService = new UserService(userRepository);
 const authenticationService = new AuthenticationService(authenticationRepository);
 const playlistService = new PlaylistService(playlistRepository, songRepository);
 const collaborationService = new CollaborationService(collaborationRepository, playlistRepository, userRepository);
+const producerService = new ProducerService();
 
 const albumController = new AlbumController(albumService);
 const songController = new SongController(songService);
 const userController = new UserController(userService);
 const authenticationController = new AuthenticationController(userService, authenticationService);
-const playlistController = new PlaylistController(playlistService);
+const playlistController = new PlaylistController(playlistService, producerService);
 const collaborationController = new CollaborationController(collaborationService);
 
 // --- ROUTES ALBUMS ---
@@ -63,6 +69,10 @@ router.post('/albums', validate(albumPayloadSchema), albumController.postAlbumHa
 router.get('/albums/:id', albumController.getAlbumByIdHandler.bind(albumController));
 router.put('/albums/:id', validate(albumPayloadSchema), albumController.putAlbumByIdHandler.bind(albumController));
 router.delete('/albums/:id', albumController.deleteAlbumByIdHandler.bind(albumController));
+router.post('/albums/:id/covers', uploadCover.single('cover'), albumController.postUploadCoverHandler.bind(albumController));
+router.post('/albums/:id/likes', authenticate, albumController.postAlbumLikeHandler.bind(albumController));
+router.delete('/albums/:id/likes', authenticate, albumController.deleteAlbumLikeHandler.bind(albumController));
+router.get('/albums/:id/likes', albumController.getAlbumLikesHandler.bind(albumController));
 
 // --- ROUTES SONGS ---
 router.post('/songs', validate(songPayloadSchema), songController.postSongHandler.bind(songController));
@@ -79,6 +89,9 @@ router.post('/playlists/:id/songs', authenticate, validate(playlistSongPayloadSc
 router.get('/playlists/:id/songs', authenticate, playlistController.getPlaylistSongsHandler.bind(playlistController));
 router.delete('/playlists/:id/songs', authenticate, validate(playlistSongPayloadSchema), playlistController.deletePlaylistSongHandler.bind(playlistController));
 router.get('/playlists/:id/activities', authenticate, playlistController.getPlaylistActivitiesHandler.bind(playlistController));
+
+// --- ROUTES EXPORT PLAYLIST ---
+router.post('/export/playlists/:playlistId', authenticate, validate(exportPlaylistPayloadSchema), playlistController.postExportPlaylistHandler.bind(playlistController));
 
 // --- ROUTES USERS ---
 router.post('/users', validate(userPayloadSchema), userController.postUserHandler.bind(userController));

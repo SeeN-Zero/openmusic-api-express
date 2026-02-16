@@ -2,6 +2,10 @@ import response from '../utils/response.js';
 import {ClientError} from '../exceptions/index.js';
 
 const ErrorHandler = (err, req, res, _next) => {
+    if (err.name === 'MulterError' && err.code === 'LIMIT_FILE_SIZE') {
+        return response(res, 413, 'Ukuran berkas melebihi batas 512000 bytes', null);
+    }
+
     if (err instanceof ClientError) {
         return response(res, err.statusCode, err.message, null);
     }

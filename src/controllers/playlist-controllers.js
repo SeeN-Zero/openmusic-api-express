@@ -1,6 +1,7 @@
 class PlaylistController {
-    constructor(service) {
+    constructor(service, producerService) {
         this._service = service;
+        this._producerService = producerService;
     }
 
     async postPlaylistHandler(req, res, next) {
@@ -114,6 +115,28 @@ class PlaylistController {
             res.json({
                 status: 'success',
                 data: activities,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async postExportPlaylistHandler(req, res, next) {
+        try {
+            const {playlistId} = req.params;
+            const {userId} = req.auth;
+            const {targetEmail} = req.validated;
+
+            await this._service.verifyPlaylistOwner(playlistId, userId);
+
+            await this._producerService.sendMessage(process.env.RABBITMQ_QUEUE, JSON.stringify({
+                playlistId,
+                targetEmail,
+            }));
+
+            res.status(201).json({
+                status: 'success',
+                message: 'Permintaan Anda sedang kami proses',
             });
         } catch (error) {
             next(error);

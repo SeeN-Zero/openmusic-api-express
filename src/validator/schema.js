@@ -48,6 +48,10 @@ export const playlistSongPayloadSchema = Joi.object({
     songId: Joi.string().required(),
 });
 
+export const exportPlaylistPayloadSchema = Joi.object({
+    targetEmail: Joi.string().email().required(),
+});
+
 // --- COLLABORATION SCHEMAS ---
 
 export const collaborationPayloadSchema = Joi.object({

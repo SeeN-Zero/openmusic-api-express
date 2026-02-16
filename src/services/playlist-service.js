@@ -21,6 +21,10 @@ class PlaylistService {
         return this._playlistRepository.getPlaylists(owner);
     }
 
+    async verifyPlaylistOwner(id, owner) {
+        await this._playlistRepository.verifyPlaylistOwner(id, owner);
+    }
+
     async deletePlaylist(id, owner) {
         await this._playlistRepository.verifyPlaylistOwner(id, owner);
         await this._playlistRepository.deletePlaylist(id);
